@@ -1,0 +1,16 @@
+# dependencies
+node_modules
+package-lock.json
+
+# logs
+*.log
+
+# coverage
+.nyc_output
+coverage
+
+# test output
+test/**/out
+
+# misc
+.DS_Store

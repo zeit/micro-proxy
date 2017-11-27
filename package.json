@@ -1,0 +1,28 @@
+{
+  "name": "micro-proxy",
+  "version": "0.0.0",
+  "description": "Simplest proxy server for microservices",
+  "bin": {
+    "micro-proxy": "./bin/micro-proxy"
+  },
+  "main": "index.js",
+  "scripts": {
+    "lint": "standard",
+    "test": "npm run lint"
+  },
+  "repository": "git@github.com:zeit/micro-proxy.git",
+  "author": "Arunoda Susiripala <arunoda.susiripala@gmail.com>",
+  "license": "MIT",
+  "private": false,
+  "dependencies": {
+    "arg": "^1.0.0",
+    "micro": "^9.0.2",
+    "node-fetch": "^1.7.3"
+  },
+  "engines": {
+    "node": ">=8.0.0"
+  },
+  "devDependencies": {
+    "standard": "^10.0.3"
+  }
+}

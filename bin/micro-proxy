@@ -1,0 +1,56 @@
+#!/usr/bin/env node
+const arg = require('arg')
+const buildProxy = require('../')
+const { resolve } = require('path')
+
+const args = arg({
+  '--help': Boolean,
+  '--rules-file': String,
+  '--port': Number,
+  '--hostname': String,
+
+  '-h': '--help',
+  '-r': '--rules-file',
+  '-p': '--port',
+  '-H': '--hostname'
+})
+
+const {
+  '--help': help,
+  '--rules-file': rulesFile,
+  '--port': port = 9000,
+  '--hostname': hostname = 'localhost'
+} = args
+
+if (help) {
+  console.log(`
+    Description
+      Start a proxy server with path based rules.
+
+    Usage
+      $ micro-proxy -r <rules.js> -p <port>
+
+    Options
+      --rules-file, -r      A .json file which contains rules for the proxy
+      --port, -p            A port number on which to start the application
+      --hostname, -H        Hostname on which to start the application
+      --help, -h            Displays this message
+  `)
+  process.exit(0)
+}
+
+if (!rulesFile) {
+  console.error(`> Start micro-proxy with --rules-file (-r) option\n`)
+  process.exit(1)
+}
+
+const rulesFilePath = resolve(process.cwd(), rulesFile)
+const { rules } = require(rulesFilePath)
+const proxy = buildProxy(rules)
+proxy.listen(port, hostname, (err) => {
+  if (err) {
+    throw err
+  }
+
+  console.log(`> Ready on http://${hostname}:${port}`)
+})
