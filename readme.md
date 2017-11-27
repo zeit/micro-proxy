@@ -5,7 +5,7 @@ With `micro-proxy`, you can create a proxy server for your microservices based o
 ### Installation
 
 ```js
-now i -g micro-proxy
+npm i -g micro-proxy
 ```
 
 Then add following rules to a filename called `rules.json`:
