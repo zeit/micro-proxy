@@ -59,5 +59,5 @@ proxy.listen(9000, (err) => {
 
 You can use `micro-proxy` as a production deployment.
 
-But if you are using [ZEIT now](https://zeit.co/now), you can simply use path [alias rules](https://zeit.co/docs/features/path-aliases) instead.
+But if you are using [ZEIT now](https://zeit.co/now), you can simply use path [alias rules](https://zeit.co/docs/features/path-aliases) instead.<br/>
 (It's a FREE service available for all ZEIT now deployments.)
