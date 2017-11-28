@@ -35,7 +35,8 @@ async function proxyRequest (req, res, dest) {
   const newUrl = resolve(dest, req.url)
   const proxyRes = await fetch(newUrl, {
     method: req.method,
-    body: req
+    body: req,
+    compress: false
   })
 
   // Forward headers
