@@ -2,6 +2,8 @@
 
 With `micro-proxy`, you can create a proxy server for your microservices based on `now.sh` [path alias rules](https://zeit.co/docs/features/path-aliases).
 
+This is specially well suited for development to mirror the production configuration of multiple microservices and backends.
+
 ### Installation
 
 ```js
