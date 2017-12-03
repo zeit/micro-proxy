@@ -74,7 +74,7 @@ function proxyWs (ws, req, dest) {
     ws.send(message)
   }
 
-  const onError = () => {
+  const onError = (err) => {
     console.error(`Error on proxying url: ${newUrl}`)
     console.error(err.stack)
   }
@@ -109,7 +109,7 @@ async function proxyRequest (req, res, dest) {
   const proxyRes = await fetch(newUrl, {
     method: req.method,
     body: req,
-    compress: false,
+    compress: false
   })
 
   // Forward headers
