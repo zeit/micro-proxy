@@ -8,7 +8,8 @@
   "main": "index.js",
   "scripts": {
     "lint": "standard",
-    "test": "npm run lint"
+    "testonly": "jest --verbose --bail -i",
+    "test": "npm run lint && npm run testonly"
   },
   "repository": "git@github.com:zeit/micro-proxy.git",
   "author": "Arunoda Susiripala <arunoda.susiripala@gmail.com>",
@@ -24,6 +25,9 @@
     "node": ">=8.0.0"
   },
   "devDependencies": {
-    "standard": "^10.0.3"
+    "jest": "^21.2.1",
+    "standard": "^10.0.3",
+    "tempfile": "^2.0.0",
+    "test-listen": "^1.1.0"
   }
 }

@@ -1,0 +1,5 @@
+{
+  "rules": [
+    { "pathname": "/blog/**", "dest": "http://localhost:6070" }
+  ]
+}

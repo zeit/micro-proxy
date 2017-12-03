@@ -109,7 +109,7 @@ async function proxyRequest (req, res, dest) {
   const proxyRes = await fetch(newUrl, {
     method: req.method,
     body: req,
-    compress: false
+    compress: false,
   })
 
   // Forward headers
