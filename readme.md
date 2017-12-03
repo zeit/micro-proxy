@@ -7,7 +7,7 @@ This is specially well suited for development to mirror the production configura
 ### Installation
 
 ```js
-now i -g micro-proxy
+npm i -g micro-proxy
 ```
 
 Then add following rules to a filename called `rules.json`:
