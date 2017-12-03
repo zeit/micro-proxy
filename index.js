@@ -34,7 +34,8 @@ module.exports = (rules) => {
 async function proxyRequest (req, res, dest) {
   const newUrl = resolve(dest, req.url)
   const proxyRes = await fetch(newUrl, {
-    method: 'GET'
+    method: req.method,
+    body: req
   })
 
   // Forward headers
