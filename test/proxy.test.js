@@ -1,7 +1,9 @@
 /* global describe, it, expect */
 
 const { createInfoServer, fetchProxy } = require('./util')
+const micro = require('micro')
 const listen = require('test-listen')
+const fetch = require('node-fetch')
 const createProxy = require('../')
 
 describe('Basic Proxy Operations', () => {
@@ -81,14 +83,110 @@ describe('Basic Proxy Operations', () => {
   })
 
   describe('methods', () => {
-    it('should proxy for method in the list')
-    it('should not proxy for a method which is not in the list')
-    it('should proxy for any method if no methods provided')
+    it('should proxy for a method in the list', async () => {
+      const s1 = await createInfoServer()
+      const proxy = createProxy([
+        { pathname: '/blog/**', method: ['GET', 'POST'], dest: s1.url }
+      ])
+      await listen(proxy)
+
+      const { data } = await fetchProxy(proxy, '/blog/hello')
+      expect(data.url).toBe('/blog/hello')
+
+      proxy.close()
+      s1.close()
+    })
+
+    it('should not proxy for a method which is not in the list', async () => {
+      const s1 = await createInfoServer()
+      const proxy = createProxy([
+        { pathname: '/blog/**', method: ['GET', 'POST'], dest: s1.url }
+      ])
+      await listen(proxy)
+
+      const { res } = await fetchProxy(proxy, '/blog/hello', { method: 'OPTIONS' })
+      expect(res.status).toBe(404)
+
+      proxy.close()
+      s1.close()
+    })
+
+    it('should proxy for any method if no methods provided', async () => {
+      const s1 = await createInfoServer()
+      const proxy = createProxy([
+        { pathname: '/blog/**', dest: s1.url }
+      ])
+      await listen(proxy)
+
+      const { data } = await fetchProxy(proxy, '/blog/hello', { method: 'OPTIONS' })
+      expect(data.method).toBe('OPTIONS')
+
+      proxy.close()
+      s1.close()
+    })
   })
 
   describe('other', () => {
-    it('should proxy the POST body')
-    it('should forward request headers')
-    it('should send back response headers')
+    it('should proxy the POST body', async () => {
+      const s1 = await createInfoServer()
+      const proxy = createProxy([
+        { pathname: '/blog/**', dest: s1.url }
+      ])
+      await listen(proxy)
+
+      const body = 'hello-body'
+      const { data } = await fetchProxy(proxy, '/blog/hello', {
+        method: 'POST',
+        body
+      })
+
+      expect(data.body).toBe(body)
+
+      proxy.close()
+      s1.close()
+    })
+
+    it('should forward request headers', async () => {
+      const s1 = await createInfoServer()
+      const proxy = createProxy([
+        { pathname: '/blog/**', dest: s1.url }
+      ])
+      await listen(proxy)
+
+      const token = 'a4n59lx83'
+      const { data } = await fetchProxy(proxy, '/blog/hello', {
+        method: 'POST',
+        headers: {
+          'zeit-token': token
+        }
+      })
+
+      expect(data.headers['zeit-token']).toBe(token)
+
+      proxy.close()
+      s1.close()
+    })
+
+    it('should send back response headers', async () => {
+      const header = 'THE_HEADER'
+      const s1 = micro(async (req, res) => {
+        res.writeHead(200, {
+          'output-header': header
+        })
+        res.end()
+      })
+      await listen(s1)
+
+      const proxy = createProxy([
+        { pathname: '/blog/**', dest: `http://localhost:${s1.address().port}` }
+      ])
+      await listen(proxy)
+
+      const res = await fetch(`http://localhost:${proxy.address().port}/blog/hello`)
+      expect(res.headers.get('output-header')).toBe(header)
+
+      proxy.close()
+      s1.close()
+    })
   })
 })
