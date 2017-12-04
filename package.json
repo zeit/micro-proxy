@@ -1,6 +1,6 @@
 {
   "name": "micro-proxy",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Simplest proxy server for microservices",
   "bin": {
     "micro-proxy": "./bin/micro-proxy"
