@@ -90,7 +90,7 @@ describe('Basic Proxy Operations', () => {
       const { data } = await fetchProxy(proxy, '/hello')
       expect(data.message).toBe('hello world')
 
-      proxy.close()
+      proxy.closeAll()
     })
   })
 

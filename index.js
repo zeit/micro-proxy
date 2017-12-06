@@ -21,7 +21,7 @@ module.exports = async (rules) => {
 
   const mountedRules = await mountRules(lintedRules)
 
-  return micro(async (req, res) => {
+  const service = micro(async (req, res) => {
     for (const { pathnameRegexp, methods, dest } of mountedRules) {
       if (pathnameRegexp.test(req.url) && (!methods || methods[req.method.toLowerCase()])) {
         await proxyRequest(req, res, dest)
@@ -32,6 +32,17 @@ module.exports = async (rules) => {
     res.writeHead(404)
     res.end('404 - Not Found')
   })
+
+  service.mountedServices = mountedRules
+    .map(r => r.service)
+    .filter(s => s !== null)
+
+  service.closeAll = () => {
+    service.mountedServices.forEach(s => s.close())
+    service.close()
+  }
+
+  return service
 }
 
 async function proxyRequest (req, res, dest) {
