@@ -1,4 +1,4 @@
-## micro-proxy - simplest proxy server for microservices
+# micro-proxy
 
 [![Build Status](https://travis-ci.org/zeit/micro-proxy.svg?branch=master)](https://travis-ci.org/zeit/micro-proxy)
 
@@ -6,7 +6,9 @@ With `micro-proxy`, you can create a proxy server for your microservices based o
 
 This is specially well suited for development to mirror the production configuration of multiple microservices and backends.
 
-### Installation
+## Usage
+
+Firstly, install the package:
 
 ```js
 npm i -g micro-proxy
