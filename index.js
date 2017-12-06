@@ -2,8 +2,9 @@ const micro = require('micro')
 const { resolve } = require('url')
 const fetch = require('node-fetch')
 const lintRules = require('./lib/lint-rules')
+const mountRules = require('./lib/mount-rules')
 
-module.exports = (rules) => {
+module.exports = async (rules) => {
   const lintedRules = lintRules(rules).map(({pathname, pathnameRe, method, dest}) => {
     const methods = method ? method.reduce((final, c) => {
       final[c.toLowerCase()] = true
@@ -18,8 +19,10 @@ module.exports = (rules) => {
     }
   })
 
+  const mountedRules = await mountRules(lintedRules)
+
   return micro(async (req, res) => {
-    for (const { pathnameRegexp, methods, dest } of lintedRules) {
+    for (const { pathnameRegexp, methods, dest } of mountedRules) {
       if (pathnameRegexp.test(req.url) && (!methods || methods[req.method.toLowerCase()])) {
         await proxyRequest(req, res, dest)
         return
