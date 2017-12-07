@@ -4,7 +4,7 @@ const fetch = require('node-fetch')
 const lintRules = require('./lib/lint-rules')
 const mountRules = require('./lib/mount-rules')
 
-module.exports = async (rules) => {
+module.exports = async (rules, rulesDirectoryPath = process.cwd()) => {
   const lintedRules = lintRules(rules).map(({pathname, pathnameRe, method, dest}) => {
     const methods = method ? method.reduce((final, c) => {
       final[c.toLowerCase()] = true
@@ -19,7 +19,7 @@ module.exports = async (rules) => {
     }
   })
 
-  const mountedRules = await mountRules(lintedRules)
+  const mountedRules = await mountRules(lintedRules, rulesDirectoryPath)
 
   const service = micro(async (req, res) => {
     for (const { pathnameRegexp, methods, dest } of mountedRules) {

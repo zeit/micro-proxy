@@ -45,9 +45,10 @@ if (!rulesFile) {
 }
 
 (async () => {
-  const rulesFilePath = resolve(process.cwd(), rulesFile)
+  const rulesDirectoryPath = process.cwd()
+  const rulesFilePath = resolve(rulesDirectoryPath, rulesFile)
   const { rules } = require(rulesFilePath)
-  const proxy = await buildProxy(rules)
+  const proxy = await buildProxy(rules, rulesDirectoryPath)
   proxy.listen(port, hostname, (err) => {
     if (err) {
       throw err
