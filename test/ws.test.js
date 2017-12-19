@@ -41,7 +41,7 @@ describe('Basic WS Operations', () => {
       const message = 'ping'
 
       ws.send(message)
-      const msg2 = await receiveWsMessageOnce(ws, 'ping')
+      const msg2 = await receiveWsMessageOnce(ws, message)
       expect(msg2).toBe(message)
 
       proxy.close()
