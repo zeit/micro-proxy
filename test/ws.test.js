@@ -38,9 +38,11 @@ describe('Basic WS Operations', () => {
       const msg1 = await receiveWsMessageOnce(ws, 'fingerprint')
       expect(msg1).toBe('fingerprint')
 
-      ws.send('ping')
+      const message = 'ping'
+
+      ws.send(message)
       const msg2 = await receiveWsMessageOnce(ws, 'ping')
-      expect(msg2).toBe('ping')
+      expect(msg2).toBe(message)
 
       proxy.close()
       s1.close()
