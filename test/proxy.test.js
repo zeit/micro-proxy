@@ -167,6 +167,21 @@ describe('Basic Proxy Operations', () => {
       s1.close()
     })
 
+    it('should forward original status code', async () => {
+      const s1 = await createInfoServer()
+      const proxy = createProxy([
+        { pathname: '/**', dest: s1.url }
+      ])
+      await listen(proxy)
+
+      const { res } = await fetchProxy(proxy, '/404')
+
+      expect(res.status).toBe(404)
+
+      proxy.close()
+      s1.close()
+    })
+
     it('should send back response headers', async () => {
       const header = 'THE_HEADER'
       const s1 = micro(async (req, res) => {

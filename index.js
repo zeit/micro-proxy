@@ -39,6 +39,9 @@ async function proxyRequest (req, res, dest) {
     body: req
   })
 
+  // Forward status code
+  res.statusCode = proxyRes.status
+
   // Forward headers
   const headers = proxyRes.headers.raw()
   for (const key of Object.keys(headers)) {

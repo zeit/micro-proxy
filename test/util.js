@@ -6,9 +6,14 @@ const { spawn } = require('child_process')
 const { writeFileSync, unlinkSync } = require('fs')
 
 exports.createInfoServer = async (port) => {
-  const server = micro(async (req) => {
+  const server = micro(async (req, res) => {
     const { method, headers, url } = req
     const body = await micro.text(req)
+
+    if (url === '/404') {
+      return micro.send(res, 404, 'Not Found')
+    }
+
     return {
       method,
       headers,
