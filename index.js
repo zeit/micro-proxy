@@ -1,5 +1,5 @@
 const micro = require('micro')
-const { resolve } = require('url')
+const { resolve, URL } = require('url')
 const fetch = require('node-fetch')
 const lintRules = require('./lib/lint-rules')
 
@@ -33,9 +33,13 @@ module.exports = (rules) => {
 
 async function proxyRequest (req, res, dest) {
   const newUrl = resolve(dest, req.url)
+  const url = new URL(dest)
   const proxyRes = await fetch(newUrl, {
     method: req.method,
-    headers: req.headers,
+    headers: {
+      ...req.headers,
+      host: url.host
+    },
     body: req
   })
 
