@@ -18,7 +18,8 @@
   "dependencies": {
     "arg": "^1.0.0",
     "micro": "^9.0.2",
-    "node-fetch": "^1.7.3"
+    "node-fetch": "^1.7.3",
+    "ws": "^3.3.2"
   },
   "engines": {
     "node": ">=8.0.0"

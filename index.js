@@ -1,7 +1,8 @@
 const micro = require('micro')
-const { resolve, URL } = require('url')
+const { resolve, parse, URL } = require('url')
 const fetch = require('node-fetch')
 const lintRules = require('./lib/lint-rules')
+const WebSocket = require('ws')
 
 module.exports = (rules) => {
   const lintedRules = lintRules(rules).map(({pathname, pathnameRe, method, dest}) => {
@@ -18,17 +19,89 @@ module.exports = (rules) => {
     }
   })
 
-  return micro(async (req, res) => {
+  const getDest = (req) => {
     for (const { pathnameRegexp, methods, dest } of lintedRules) {
       if (pathnameRegexp.test(req.url) && (!methods || methods[req.method.toLowerCase()])) {
-        await proxyRequest(req, res, dest)
-        return
+        return dest
       }
     }
+  }
 
-    res.writeHead(404)
-    res.end('404 - Not Found')
+  const server = micro(async (req, res) => {
+    try {
+      const dest = getDest(req)
+
+      if (!dest) {
+        res.writeHead(404)
+        res.end('404 - Not Found')
+        return
+      }
+
+      await proxyRequest(req, res, dest)
+    } catch (err) {
+      console.error(err.stack)
+      res.end()
+    }
   })
+
+  const wss = new WebSocket.Server({ server })
+  wss.on('connection', (ws, req) => {
+    const dest = getDest(req)
+
+    if (!dest) {
+      ws.close()
+      return
+    }
+
+    proxyWs(ws, req, dest)
+  })
+
+  return server
+}
+
+function proxyWs (ws, req, dest) {
+  const destUrlObject = parse(dest)
+  const newUrl = `ws://${destUrlObject.host}${req.url}`
+
+  const destWs = new WebSocket(newUrl)
+
+  // util functions
+  const incomingHandler = (message) => {
+    destWs.send(message)
+  }
+
+  const outgoingHandler = (message) => {
+    ws.send(message)
+  }
+
+  const onError = (err) => {
+    console.error(`Error on proxying url: ${newUrl}`)
+    console.error(err.stack)
+  }
+
+  const removeListeners = () => {
+    ws.removeListener('message', incomingHandler)
+    destWs.removeListener('message', outgoingHandler)
+  }
+
+  // events handling
+  destWs.on('open', () => {
+    ws.addListener('message', incomingHandler)
+    destWs.addListener('message', outgoingHandler)
+  })
+
+  ws.on('close', () => {
+    destWs.close()
+    removeListeners()
+  })
+
+  destWs.on('close', () => {
+    ws.close()
+    removeListeners()
+  })
+
+  ws.on('error', onError)
+  destWs.on('error', onError)
 }
 
 async function proxyRequest (req, res, dest) {
@@ -40,7 +113,8 @@ async function proxyRequest (req, res, dest) {
       ...req.headers,
       host: url.host
     },
-    body: req
+    body: req,
+    compress: false
   })
 
   // Forward status code
