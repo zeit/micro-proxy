@@ -167,6 +167,27 @@ describe('Basic Proxy Operations', () => {
       s1.close()
     })
 
+    it('should override host header using dest', async () => {
+      const s1 = await createInfoServer()
+      const proxy = createProxy([
+        { pathname: '/blog/**', dest: s1.url }
+      ])
+      await listen(proxy)
+
+      const { data } = await fetchProxy(proxy, '/blog/hello', {
+        method: 'POST',
+        headers: {
+          host: 'my-host.com'
+        }
+      })
+
+      expect(data.headers['host']).not.toBe('my-host.com')
+      expect(data.headers['host']).toContain('localhost')
+
+      proxy.close()
+      s1.close()
+    })
+
     it('should forward original status code', async () => {
       const s1 = await createInfoServer()
       const proxy = createProxy([
