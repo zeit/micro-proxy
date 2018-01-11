@@ -44,13 +44,16 @@ if (!rulesFile) {
   process.exit(1)
 }
 
-const rulesFilePath = resolve(process.cwd(), rulesFile)
-const { rules } = require(rulesFilePath)
-const proxy = buildProxy(rules)
-proxy.listen(port, hostname, (err) => {
-  if (err) {
-    throw err
-  }
-
-  console.log(`> Ready on http://${hostname}:${port}`)
-})
+(async () => {
+  const rulesDirectoryPath = process.cwd()
+  const rulesFilePath = resolve(rulesDirectoryPath, rulesFile)
+  const { rules } = require(rulesFilePath)
+  const proxy = await buildProxy(rules, rulesDirectoryPath)
+  proxy.listen(port, hostname, (err) => {
+    if (err) {
+      throw err
+    }
+  
+    console.log(`> Ready on http://${hostname}:${port}`)
+  })
+})()

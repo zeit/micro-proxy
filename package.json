@@ -18,7 +18,8 @@
   "dependencies": {
     "arg": "^1.0.0",
     "micro": "^9.0.2",
-    "node-fetch": "^1.7.3"
+    "node-fetch": "^1.7.3",
+    "test-listen": "^1.1.0"
   },
   "engines": {
     "node": ">=8.0.0"
@@ -26,7 +27,6 @@
   "devDependencies": {
     "jest": "^21.2.1",
     "standard": "^10.0.3",
-    "tempfile": "^2.0.0",
-    "test-listen": "^1.1.0"
+    "tempfile": "^2.0.0"
   }
 }

@@ -1,5 +1,6 @@
 {
   "rules": [
-    { "pathname": "/blog/**", "dest": "http://localhost:6070" }
+    { "pathname": "/blog/**", "dest": "http://localhost:6070" },
+    { "pathname": "/hello", "dest": "./test/fixtures/micro-example.js" }
   ]
 }
