@@ -1,5 +1,6 @@
 const micro = require('micro')
 const { resolve, parse, URL } = require('url')
+const { isMatch } = require('micromatch')
 const fetch = require('node-fetch')
 const lintRules = require('./lib/lint-rules')
 const WebSocket = require('ws')
@@ -13,15 +14,14 @@ module.exports = (rules) => {
 
     return {
       pathname,
-      pathnameRegexp: new RegExp(pathnameRe || pathname || '.*'),
       dest,
       methods
     }
   })
 
   const getDest = (req) => {
-    for (const { pathnameRegexp, methods, dest } of lintedRules) {
-      if (pathnameRegexp.test(req.url) && (!methods || methods[req.method.toLowerCase()])) {
+    for (const { pathname, methods, dest } of lintedRules) {
+      if (!pathname || (isMatch(req.url, pathname) && (!methods || methods[req.method.toLowerCase()]))) {
         return dest
       }
     }

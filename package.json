@@ -18,6 +18,7 @@
   "dependencies": {
     "arg": "^1.0.0",
     "micro": "^9.0.2",
+    "micromatch": "^3.1.5",
     "node-fetch": "^1.7.3",
     "ws": "^3.3.2"
   },
