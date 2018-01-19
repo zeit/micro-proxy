@@ -41,7 +41,7 @@ describe('Basic Proxy Operations', () => {
       const s1 = await createInfoServer()
       const proxy = createProxy([
         { pathname: '/abc', dest: 'http://localhost' },
-        { pathname: '/blog/**', dest: s1.url }
+        { dest: s1.url }
       ])
       await listen(proxy)
 
@@ -55,7 +55,7 @@ describe('Basic Proxy Operations', () => {
     it('should send 404 if no matching rule found', async () => {
       const s1 = await createInfoServer()
       const proxy = createProxy([
-        { pathname: '/abc', dest: 'http://localhost' }
+        { pathname: '/hello', dest: 'http://localhost' }
       ])
       await listen(proxy)
 
