@@ -5,7 +5,7 @@ const lintRules = require('./lib/lint-rules')
 const WebSocket = require('ws')
 
 module.exports = (rules) => {
-  const lintedRules = lintRules(rules).map(({pathname, pathnameRe, method, dest}) => {
+  const lintedRules = lintRules(rules).map(({pathname, pathnameRe, method, dest, handleRedirects}) => {
     const methods = method ? method.reduce((final, c) => {
       final[c.toLowerCase()] = true
       return final
@@ -15,21 +15,22 @@ module.exports = (rules) => {
       pathname,
       pathnameRegexp: new RegExp(pathnameRe || pathname || '.*'),
       dest,
-      methods
+      methods,
+      handleRedirects,
     }
   })
 
   const getDest = (req) => {
-    for (const { pathnameRegexp, methods, dest } of lintedRules) {
+    for (const { pathnameRegexp, methods, dest, handleRedirects } of lintedRules) {
       if (pathnameRegexp.test(req.url) && (!methods || methods[req.method.toLowerCase()])) {
-        return dest
+        return { dest, handleRedirects }
       }
     }
   }
 
   const server = micro(async (req, res) => {
     try {
-      const dest = getDest(req)
+      const { dest, handleRedirects } = getDest(req)
 
       if (!dest) {
         res.writeHead(404)
@@ -37,7 +38,7 @@ module.exports = (rules) => {
         return
       }
 
-      await proxyRequest(req, res, dest)
+      await proxyRequest(req, res, dest, handleRedirects)
     } catch (err) {
       console.error(err.stack)
       res.end()
@@ -46,7 +47,7 @@ module.exports = (rules) => {
 
   const wss = new WebSocket.Server({ server })
   wss.on('connection', (ws, req) => {
-    const dest = getDest(req)
+    const { dest } = getDest(req)
 
     if (!dest) {
       ws.close()
@@ -104,11 +105,12 @@ function proxyWs (ws, req, dest) {
   destWs.on('error', onError)
 }
 
-async function proxyRequest (req, res, dest) {
+async function proxyRequest (req, res, dest, handleRedirects = 'follow') {
   const newUrl = resolve(dest, req.url)
   const url = new URL(dest)
   const proxyRes = await fetch(newUrl, {
     method: req.method,
+    redirect: handleRedirects,
     headers: {
       ...req.headers,
       host: url.host
