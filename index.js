@@ -109,10 +109,7 @@ async function proxyRequest (req, res, dest) {
   const url = new URL(dest)
   const proxyRes = await fetch(newUrl, {
     method: req.method,
-    headers: {
-      ...req.headers,
-      host: url.host
-    },
+    headers: Object.assign({}, req.headers, { host: url.host }),
     body: req,
     compress: false
   })
