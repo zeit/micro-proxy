@@ -117,8 +117,14 @@ async function proxyRequest (req, res, dest) {
   // Forward status code
   res.statusCode = proxyRes.status
 
+  // Disable cache
+  const cacheDisablingHeaders = {
+    'Cache-Control': 'no-cache, no-store, must-revalidate',
+    'Pragma': 'no-cache',
+    'Expires': '0'
+  }
   // Forward headers
-  const headers = proxyRes.headers.raw()
+  const headers = { ...proxyRes.headers.raw(), ...cacheDisablingHeaders }
   for (const key of Object.keys(headers)) {
     res.setHeader(key, headers[key])
   }
