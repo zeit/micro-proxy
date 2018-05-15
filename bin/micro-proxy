@@ -46,7 +46,8 @@ if (!rulesFile) {
 
 const rulesFilePath = resolve(process.cwd(), rulesFile)
 const { rules } = require(rulesFilePath)
-const proxy = buildProxy(rules)
+const { proxy } = buildProxy(rules)
+
 proxy.listen(port, hostname, (err) => {
   if (err) {
     throw err

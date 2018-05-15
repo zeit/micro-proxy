@@ -5,19 +5,25 @@ const lintRules = require('./lib/lint-rules')
 const WebSocket = require('ws')
 
 module.exports = (rules) => {
-  const lintedRules = lintRules(rules).map(({pathname, pathnameRe, method, dest}) => {
-    const methods = method ? method.reduce((final, c) => {
-      final[c.toLowerCase()] = true
-      return final
-    }, {}) : null
+  let lintedRules
 
-    return {
-      pathname,
-      pathnameRegexp: new RegExp(pathnameRe || pathname || '.*'),
-      dest,
-      methods
-    }
-  })
+  const setRules = (rules) => {
+    lintedRules = lintRules(rules).map(({pathname, pathnameRe, method, dest}) => {
+      const methods = method ? method.reduce((final, c) => {
+        final[c.toLowerCase()] = true
+        return final
+      }, {}) : null
+
+      return {
+        pathname,
+        pathnameRegexp: new RegExp(pathnameRe || pathname || '.*'),
+        dest,
+        methods
+      }
+    })
+  }
+
+  setRules(rules)
 
   const getDest = (req) => {
     for (const { pathnameRegexp, methods, dest } of lintedRules) {
@@ -56,7 +62,7 @@ module.exports = (rules) => {
     proxyWs(ws, req, dest)
   })
 
-  return server
+  return { proxy: server, setRules }
 }
 
 function proxyWs (ws, req, dest) {

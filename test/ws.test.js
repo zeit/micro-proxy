@@ -10,7 +10,7 @@ describe('Basic WS Operations', () => {
   describe('ws', () => {
     it('should receive websocket messages', async () => {
       const s1 = await createWsServer()
-      const proxy = createProxy([
+      const { proxy } = createProxy([
         { pathname: '/ws', dest: s1.url }
       ])
 
@@ -27,7 +27,7 @@ describe('Basic WS Operations', () => {
 
     it('should send and receive websocket messages', async () => {
       const s1 = await createWsServer()
-      const proxy = createProxy([
+      const { proxy } = createProxy([
         { pathname: '/ws', dest: s1.url }
       ])
 
