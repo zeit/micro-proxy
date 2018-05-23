@@ -1,6 +1,6 @@
 # micro-proxy
 
-[![Build Status](https://travis-ci.org/zeit/micro-proxy.svg?branch=master)](https://travis-ci.org/zeit/micro-proxy)
+[![Build Status](https://travis-ci.org/zeit/micro-proxy.svg?branch=master)](https://travis-ci.org/zeit/micro-proxy) [![Greenkeeper badge](https://badges.greenkeeper.io/zeit/micro-proxy.svg)](https://greenkeeper.io/)
 
 With `micro-proxy`, you can create a proxy server for your microservices based on `now.sh` [path alias rules](https://zeit.co/docs/features/path-aliases).
 
