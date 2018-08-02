@@ -29,6 +29,10 @@ module.exports = (rules) => {
 
   const server = micro(async (req, res) => {
     try {
+      if (res.headersSent) {
+        return
+      }
+
       const dest = getDest(req)
 
       if (!dest) {
