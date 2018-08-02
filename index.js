@@ -5,7 +5,7 @@ const lintRules = require('./lib/lint-rules')
 const WebSocket = require('ws')
 
 module.exports = (rules) => {
-  const lintedRules = lintRules(rules).map(({pathname, pathnameRe, method, dest}) => {
+  const lintedRules = lintRules(rules).map(({pathname, pathnameRe, method, dest, redirect}) => {
     const methods = method ? method.reduce((final, c) => {
       final[c.toLowerCase()] = true
       return final
@@ -15,25 +15,32 @@ module.exports = (rules) => {
       pathname,
       pathnameRegexp: new RegExp(pathnameRe || pathname || '.*'),
       dest,
+      redirect,
       methods
     }
   })
 
   const getDest = (req) => {
-    for (const { pathnameRegexp, methods, dest } of lintedRules) {
+    for (const { pathnameRegexp, methods, dest, redirect } of lintedRules) {
       if (pathnameRegexp.test(req.url) && (!methods || methods[req.method.toLowerCase()])) {
-        return dest
+        return { dest, redirect }
       }
     }
+
+    return {}
   }
 
   const server = micro(async (req, res) => {
     try {
-      if (res.headersSent) {
+      const { dest, redirect } = getDest(req)
+
+      if (redirect) {
+        res.writeHead(301, {
+          Location: redirect
+        })
+        res.end()
         return
       }
-
-      const dest = getDest(req)
 
       if (!dest) {
         res.writeHead(404)
@@ -50,7 +57,7 @@ module.exports = (rules) => {
 
   const wss = new WebSocket.Server({ server })
   wss.on('connection', (ws, req) => {
-    const dest = getDest(req)
+    const { dest } = getDest(req)
 
     if (!dest) {
       ws.close()
