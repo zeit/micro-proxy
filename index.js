@@ -105,7 +105,9 @@ function proxyWs (ws, req, dest) {
 }
 
 async function proxyRequest (req, res, dest) {
-  const newUrl = resolve(dest, req.url)
+  const tempUrl = resolve(dest, req.url)
+  const cleanUrl = new URL(tempUrl)
+  const newUrl = resolve(dest, `${cleanUrl.pathname}${cleanUrl.search}`)
   const url = new URL(dest)
   const proxyRes = await fetch(newUrl, {
     method: req.method,
