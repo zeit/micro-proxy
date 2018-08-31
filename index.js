@@ -5,7 +5,7 @@ const lintRules = require('./lib/lint-rules')
 const WebSocket = require('ws')
 
 module.exports = (rules) => {
-  const lintedRules = lintRules(rules).map(({pathname, pathnameRe, method, dest}) => {
+  const lintedRules = lintRules(rules).map(({pathname, pathnameRe, method, dest, appending}) => {
     const methods = method ? method.reduce((final, c) => {
       final[c.toLowerCase()] = true
       return final
@@ -15,7 +15,8 @@ module.exports = (rules) => {
       pathname,
       pathnameRegexp: new RegExp(pathnameRe || pathname || '.*'),
       dest,
-      methods
+      methods,
+      appending
     }
   })
 
@@ -27,9 +28,18 @@ module.exports = (rules) => {
     }
   }
 
+  const getAppending = (req) => {
+    for (const { pathnameRegexp, methods, appending } of lintedRules) {
+      if (pathnameRegexp.test(req.url) && (!methods || methods[req.method.toLowerCase()])) {
+        return appending
+      }
+    }
+  }
+
   const server = micro(async (req, res) => {
     try {
       const dest = getDest(req)
+      const appending = getAppending(req)
 
       if (!dest) {
         res.writeHead(404)
@@ -37,7 +47,7 @@ module.exports = (rules) => {
         return
       }
 
-      await proxyRequest(req, res, dest)
+      await proxyRequest(req, res, dest, appending)
     } catch (err) {
       console.error(err.stack)
       res.end()
@@ -104,10 +114,12 @@ function proxyWs (ws, req, dest) {
   destWs.on('error', onError)
 }
 
-async function proxyRequest (req, res, dest) {
-  const tempUrl = resolve(dest, req.url)
-  const cleanUrl = new URL(tempUrl)
-  const newUrl = resolve(dest, `${cleanUrl.pathname}${cleanUrl.search}`)
+async function proxyRequest (req, res, dest, appending = false) {
+  if (dest[dest.length - 1] !== '/') {
+    dest = dest + '/'
+  }
+  const requestUrl = appending ? req.url.replace(/^\//, '') : req.url
+  const newUrl = resolve(dest, requestUrl)
   const url = new URL(dest)
   const proxyRes = await fetch(newUrl, {
     method: req.method,

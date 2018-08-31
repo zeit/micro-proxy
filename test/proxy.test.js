@@ -80,6 +80,39 @@ describe('Basic Proxy Operations', () => {
       proxy.close()
       s1.close()
     })
+
+    it('should append the url onto the destination when appending is true', async () => {
+      const s1 = await createInfoServer()
+      const proxy = createProxy([
+        {
+          pathname: '/abc/**',
+          dest: `${s1.url}/xyz`,
+          appending: true
+        }
+      ])
+      await listen(proxy)
+      const { data } = await fetchProxy(proxy, '/abc/123')
+      expect(data.url).toBe('/xyz/abc/123')
+
+      proxy.close()
+      s1.close()
+    })
+
+    it('should overwrite the url to the destination without appending', async () => {
+      const s1 = await createInfoServer()
+      const proxy = createProxy([
+        {
+          pathname: '/abc/**',
+          dest: `${s1.url}/xyz`
+        }
+      ])
+      await listen(proxy)
+      const { data } = await fetchProxy(proxy, '/abc/123')
+      expect(data.url).toBe('/abc/123')
+
+      proxy.close()
+      s1.close()
+    })
   })
 
   describe('methods', () => {
