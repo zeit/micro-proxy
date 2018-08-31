@@ -19,6 +19,7 @@ Then add following rules to a filename called `rules.json`:
 ```json
 {
   "rules": [
+    {"pathname": "/content/**", "method":["GET", "POST", "OPTIONS"], "dest": "http://localhost:3000/site", "appending": true}
     {"pathname": "/blog", "method":["GET", "POST", "OPTIONS"], "dest": "http://localhost:5000"},
     {"pathname": "/**", "dest": "http://localhost:4000"}
   ]
@@ -60,6 +61,19 @@ proxy.listen(9000, (err) => {
   console.log(`> Ready on http://localhost:9000`)
 })
 ```
+
+### Appending mode
+
+Example:
+```json
+{
+  "rules": [
+    { "pathname": "/**", "dest": "http://localhost:9000/site", "appending": true }
+  ]
+ }
+```
+
+Now when visiting `/blog/1234` I would be sent to `http://localhost:9000/site/blog/1234` instead of `http://localhost:9000/blog/1234` without the appending attribute set.
 
 ### Production Usage
 
