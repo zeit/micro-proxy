@@ -1,0 +1,14 @@
+{
+  "name": "with-https",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node ."
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "openssl-self-signed-certificate": "^1.1.6"
+  }
+}

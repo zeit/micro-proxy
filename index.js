@@ -1,10 +1,11 @@
 const micro = require('micro')
+const https = require('https')
 const { resolve, parse, URL } = require('url')
 const fetch = require('node-fetch')
 const lintRules = require('./lib/lint-rules')
 const WebSocket = require('ws')
 
-module.exports = (rules) => {
+module.exports = (rules, httpsOptions) => {
   const lintedRules = lintRules(rules).map(({pathname, pathnameRe, method, dest}) => {
     const methods = method ? method.reduce((final, c) => {
       final[c.toLowerCase()] = true
@@ -27,7 +28,9 @@ module.exports = (rules) => {
     }
   }
 
-  const server = micro(async (req, res) => {
+  const createServer = httpsOptions ? fn => https.createServer(httpsOptions, (req, res) => micro.run(req, res, fn)) : micro
+
+  const server = createServer(async (req, res) => {
     try {
       const dest = getDest(req)
 
