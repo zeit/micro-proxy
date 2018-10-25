@@ -113,7 +113,8 @@ async function proxyRequest (req, res, dest) {
     method: req.method,
     headers: Object.assign({}, req.headers, { host: url.host }),
     body: req,
-    compress: false
+    compress: false,
+    redirect: 'manual'
   })
 
   // Forward status code
