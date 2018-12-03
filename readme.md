@@ -20,12 +20,14 @@ Then add following rules to a filename called `rules.json`:
 {
   "rules": [
     {"pathname": "/blog", "method":["GET", "POST", "OPTIONS"], "dest": "http://localhost:5000"},
+    {"pathname": "/main/blog", "dest": "http://localhost:5000", "rewrites": { "^/main" : "" }},
     {"pathname": "/**", "dest": "http://localhost:4000"}
   ]
 }
 ```
 
 > Visit [path alias](https://zeit.co/docs/features/path-aliases) documentation to learn more about rules.
+> `rewrites` is similar to [`pathRewrite`](https://webpack.js.org/configuration/dev-server/#devserver-proxy) from webpack
 
 Run the proxy server with:
 
