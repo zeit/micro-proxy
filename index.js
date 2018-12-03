@@ -5,7 +5,7 @@ const lintRules = require('./lib/lint-rules')
 const WebSocket = require('ws')
 
 module.exports = (rules) => {
-  const lintedRules = lintRules(rules).map(({pathname, pathnameRe, method, dest, rewrites}) => {
+  const lintedRules = lintRules(rules).map(({ pathname, pathnameRe, method, dest, rewrites }) => {
     const methods = method ? method.reduce((final, c) => {
       final[c.toLowerCase()] = true
       return final
@@ -14,14 +14,14 @@ module.exports = (rules) => {
     return {
       pathname,
       pathnameRegexp: new RegExp(pathnameRe || pathname || '.*'),
-      rewrites, 
+      rewrites,
       dest,
       methods
     }
   })
 
   const getData = (req, prop) => {
-    for (const [index, {pathnameRegexp, methods}] of lintedRules.entries()) {
+    for (const [index, { pathnameRegexp, methods }] of lintedRules.entries()) {
       if (pathnameRegexp.test(req.url) && (!methods || methods[req.method.toLowerCase()])) {
         return lintedRules[index][prop]
       }
@@ -41,9 +41,9 @@ module.exports = (rules) => {
       const rewrites = getData(req, 'rewrites')
 
       // Apply URL rewrites
-      if(rewrites) {
+      if (rewrites) {
         req.url = rewrites.reduce((acc, rewrite) => {
-          return acc.replace(rewrite.reg, rewrite.rep);
+          return acc.replace(rewrite.reg, rewrite.rep)
         }, req.url)
       }
 

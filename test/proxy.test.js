@@ -84,10 +84,10 @@ describe('Basic Proxy Operations', () => {
     it('should proxy with all url rewrites', async () => {
       const s1 = await createInfoServer()
       const proxy = createProxy([
-        { pathname: '/abc/blog/**', dest: s1.url, rewrites: {'^/abc': ''}}
+        { pathname: '/abc/blog/**', dest: s1.url, rewrites: { '^/abc': '' } }
       ])
       await listen(proxy)
-      
+
       const { data } = await fetchProxy(proxy, '/abc/blog/nice-one')
       expect(data.url).toBe('/blog/nice-one')
 
