@@ -80,6 +80,20 @@ describe('Basic Proxy Operations', () => {
       proxy.close()
       s1.close()
     })
+
+    it('should proxy with all url rewrites', async () => {
+      const s1 = await createInfoServer()
+      const proxy = createProxy([
+        { pathname: '/abc/blog/**', dest: s1.url, rewrites: {'^/abc': ''}}
+      ])
+      await listen(proxy)
+      
+      const { data } = await fetchProxy(proxy, '/abc/blog/nice-one')
+      expect(data.url).toBe('/blog/nice-one')
+
+      proxy.close()
+      s1.close()
+    })
   })
 
   describe('methods', () => {

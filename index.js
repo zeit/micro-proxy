@@ -5,7 +5,7 @@ const lintRules = require('./lib/lint-rules')
 const WebSocket = require('ws')
 
 module.exports = (rules) => {
-  const lintedRules = lintRules(rules).map(({pathname, pathnameRe, method, dest}) => {
+  const lintedRules = lintRules(rules).map(({pathname, pathnameRe, method, dest, rewrites}) => {
     const methods = method ? method.reduce((final, c) => {
       final[c.toLowerCase()] = true
       return final
@@ -14,27 +14,37 @@ module.exports = (rules) => {
     return {
       pathname,
       pathnameRegexp: new RegExp(pathnameRe || pathname || '.*'),
+      rewrites, 
       dest,
       methods
     }
   })
 
-  const getDest = (req) => {
-    for (const { pathnameRegexp, methods, dest } of lintedRules) {
+  const getData = (req, prop) => {
+    for (const [index, {pathnameRegexp, methods}] of lintedRules.entries()) {
       if (pathnameRegexp.test(req.url) && (!methods || methods[req.method.toLowerCase()])) {
-        return dest
+        return lintedRules[index][prop]
       }
     }
   }
 
   const server = micro(async (req, res) => {
     try {
-      const dest = getDest(req)
+      const dest = getData(req, 'dest')
 
       if (!dest) {
         res.writeHead(404)
         res.end('404 - Not Found')
         return
+      }
+
+      const rewrites = getData(req, 'rewrites')
+
+      // Apply URL rewrites
+      if(rewrites) {
+        req.url = rewrites.reduce((acc, rewrite) => {
+          return acc.replace(rewrite.reg, rewrite.rep);
+        }, req.url)
       }
 
       await proxyRequest(req, res, dest)
@@ -46,7 +56,7 @@ module.exports = (rules) => {
 
   const wss = new WebSocket.Server({ server })
   wss.on('connection', (ws, req) => {
-    const dest = getDest(req)
+    const dest = getData(req, 'dest')
 
     if (!dest) {
       ws.close()
