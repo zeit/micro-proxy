@@ -72,7 +72,7 @@ exports.receiveWsMessageOnce = async (ws, message) => new Promise(resolve => {
   })
 })
 
-exports.fetchProxy = async (proxy, path, options) => {
+exports.fetchProxy = async (proxy, path, options = { redirect: 'manual' }) => {
   const res = await fetch(`http://localhost:${proxy.address().port}${path}`, options)
   if (res.status !== 200) {
     return { res }

@@ -244,5 +244,32 @@ describe('Basic Proxy Operations', () => {
       proxy.close()
       s1.close()
     })
+
+    it('should send back redirects', async () => {
+      const s1 = micro(async (req, res) => {
+        res.writeHead(302, {
+          'location': 'http://localhost/other-blog/hello'
+        })
+        res.end()
+      })
+      await listen(s1)
+
+      const s2 = await createInfoServer()
+
+      const proxy = createProxy([
+        { pathname: '/blog/**', dest: `http://localhost:${s1.address().port}` },
+        { pathname: '/other-blog/**', dest: s2.url }
+      ])
+      await listen(proxy)
+
+      const { res } = await fetchProxy(proxy, '/blog/hello')
+
+      expect(res.status).toBe(302)
+      expect(res.headers.get('location')).toBe('http://localhost/other-blog/hello')
+
+      proxy.close()
+      s1.close()
+      s2.close()
+    })
   })
 })
