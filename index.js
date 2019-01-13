@@ -5,7 +5,7 @@ const lintRules = require('./lib/lint-rules')
 const WebSocket = require('ws')
 
 module.exports = (rules) => {
-  const lintedRules = lintRules(rules).map(({pathname, pathnameRe, method, dest}) => {
+  const lintedRules = lintRules(rules).map(({pathname, pathnameRe, method, dest, headers}) => {
     const methods = method ? method.reduce((final, c) => {
       final[c.toLowerCase()] = true
       return final
@@ -15,7 +15,8 @@ module.exports = (rules) => {
       pathname,
       pathnameRegexp: new RegExp(pathnameRe || pathname || '.*'),
       dest,
-      methods
+      methods,
+      headers
     }
   })
 
@@ -27,9 +28,18 @@ module.exports = (rules) => {
     }
   }
 
+  const getHeaders = (req) => {
+    for (const { pathnameRegexp, methods, headers } of lintedRules) {
+      if (pathnameRegexp.test(req.url) && (!methods || methods[req.method.toLowerCase()])) {
+        return headers
+      }
+    }
+  }
+
   const server = micro(async (req, res) => {
     try {
       const dest = getDest(req)
+      const headers = getHeaders(req)
 
       if (!dest) {
         res.writeHead(404)
@@ -37,7 +47,7 @@ module.exports = (rules) => {
         return
       }
 
-      await proxyRequest(req, res, dest)
+      await proxyRequest(req, res, dest, headers)
     } catch (err) {
       console.error(err.stack)
       res.end()
@@ -104,14 +114,14 @@ function proxyWs (ws, req, dest) {
   destWs.on('error', onError)
 }
 
-async function proxyRequest (req, res, dest) {
+async function proxyRequest (req, res, dest, reqHeaders) {
   const tempUrl = resolve(dest, req.url)
   const cleanUrl = new URL(tempUrl)
   const newUrl = resolve(dest, `${cleanUrl.pathname}${cleanUrl.search}`)
   const url = new URL(dest)
   const proxyRes = await fetch(newUrl, {
     method: req.method,
-    headers: Object.assign({ 'x-forwarded-host': req.headers.host }, req.headers, { host: url.host }),
+    headers: Object.assign({ 'x-forwarded-host': req.headers.host }, req.headers, { host: url.host }, reqHeaders),
     body: req,
     compress: false,
     redirect: 'manual'

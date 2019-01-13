@@ -271,5 +271,21 @@ describe('Basic Proxy Operations', () => {
       s1.close()
       s2.close()
     })
+    it('should append request headers', async () => {
+      const s1 = await createInfoServer()
+      const proxy = createProxy([
+        { pathname: '/**', dest: s1.url, headers: { 'x-auth': 'test' } }
+      ])
+      await listen(proxy)
+
+      const { data } = await fetchProxy(proxy, '/hello', {
+        method: 'POST'
+      })
+
+      expect(data.headers['x-auth']).toBe('test')
+
+      proxy.close()
+      s1.close()
+    })
   })
 })
