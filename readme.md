@@ -19,11 +19,13 @@ Then add following rules to a filename called `rules.json`:
 ```json
 {
   "rules": [
-    {"pathname": "/blog", "method":["GET", "POST", "OPTIONS"], "dest": "http://localhost:5000"},
+    {"pathname": "/blog", "method":["GET", "POST", "OPTIONS"], "dest": "http://localhost:5000", "headers": { "Save-Data": "on" } },
     {"pathname": "/**", "dest": "http://localhost:4000"}
   ]
 }
 ```
+
+*Note*: Valid properties for each rule object in the `rules` array are `pathname`, `dest`, `method`, and `headers`.
 
 > Visit [path alias](https://zeit.co/docs/features/path-aliases) documentation to learn more about rules.
 
@@ -49,7 +51,7 @@ Then create the proxy server like this:
 ```js
 const createProxy = require('micro-proxy')
 const proxy = createProxy([
-  {"pathname": "/blog", "method":["GET", "POST", "OPTIONS"], "dest": "http://localhost:5000"},
+  {"pathname": "/blog", "method":["GET", "POST", "OPTIONS"], "dest": "http://localhost:5000", "headers": { "Save-Data": "on" } },
   {"pathname": "/**", "dest": "http://localhost:4000"}
 ])
 
